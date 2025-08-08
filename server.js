@@ -1,13 +1,30 @@
-const express = require('express');
+const express = require('express'); // ✅ GOOD
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const cors = require('cors');
+
+dotenv.config();
 const app = express();
-const port = 3000;
 
-app.use(express.static('public')); // Serves files from /public
+app.use(cors());
+app.use(express.json()); // for parsing JSON
 
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
-});
+// Import routes
+const userRoutes = require('./routes/userRoutes');
+const stationRoutes = require('./routes/stationRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
-app.listen(port, () => {
-  console.log(`App running at http://localhost:${port}`);
-});
+// Use routes
+app.use('/api/users', userRoutes);
+app.use('/api/bookings', bookingRoutes);
+app.use('/api/stations', stationRoutes);
+
+
+// MongoDB connection
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => {
+  console.log('MongoDB connected');
+  app.listen(5000, () => console.log('Server running on port 5000'));
+}).catch(err => console.error(err));
